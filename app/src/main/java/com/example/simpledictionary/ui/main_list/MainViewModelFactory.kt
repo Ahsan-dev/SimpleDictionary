@@ -1,4 +1,4 @@
-package com.example.simpledictionary.ui.viewmodels
+package com.example.simpledictionary.ui.main_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider

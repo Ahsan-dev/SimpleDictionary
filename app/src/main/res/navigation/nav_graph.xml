@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.example.simpledictionary.ui.FirstFragment"
+        android:name="com.example.simpledictionary.ui.edit_word.FirstFragment"
         android:label="@string/first_fragment_label"
         tools:layout="@layout/fragment_first">
 
@@ -17,7 +17,7 @@
     </fragment>
     <fragment
         android:id="@+id/SecondFragment"
-        android:name="com.example.simpledictionary.ui.SecondFragment"
+        android:name="com.example.simpledictionary.ui.main_list.SecondFragment"
         android:label="@string/second_fragment_label"
         tools:layout="@layout/fragment_second">
 
@@ -30,7 +30,7 @@
     </fragment>
     <fragment
         android:id="@+id/wordDetailsFragment"
-        android:name="com.example.simpledictionary.ui.WordDetailsFragment"
+        android:name="com.example.simpledictionary.ui.word_detail.WordDetailsFragment"
         android:label="fragment_word_details"
         tools:layout="@layout/fragment_word_details">
         <argument

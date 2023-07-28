@@ -1,4 +1,4 @@
-package com.example.simpledictionary.ui
+package com.example.simpledictionary.ui.word_detail
 
 import android.os.Bundle
 import android.util.Log
@@ -6,10 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.example.simpledictionary.R
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.example.simpledictionary.databinding.FragmentWordDetailsBinding
-import com.example.simpledictionary.models.EnglishWords
 import com.example.simpledictionary.repository.SimpleDictDBRepository
+import com.example.simpledictionary.ui.main_list.SecondFragment
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -24,8 +25,8 @@ class WordDetailsFragment : Fragment() {
     private lateinit var _binding: FragmentWordDetailsBinding
     @Inject
     lateinit var simpleDictDBRepo: SimpleDictDBRepository
-
     private val binding get() = _binding
+    private val viewModel: WordDetailViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,14 +45,17 @@ class WordDetailsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val id = arguments?.getInt(SecondFragment.ARG_ID)
         Log.d("MainActivity","Received Id is: $id")
-        val word = simpleDictDBRepo.getWordDetail(id?:1)
-        setupUi(word)
+        viewModel.getWordDetails(id?:1)
+        setupUi()
     }
 
-    fun setupUi(word: EnglishWords){
-        binding.tvDetailWord.text = word.word
-        binding.tvDetailType.text = word.type
-        binding.tvDetailMeaning.text = word.meaning
+    fun setupUi(){
+
+        viewModel.word.observe(viewLifecycleOwner, Observer {word->
+            binding.tvDetailWord.text = word.word
+            binding.tvDetailType.text = word.type
+            binding.tvDetailMeaning.text = word.meaning
+        })
     }
 
     companion object {

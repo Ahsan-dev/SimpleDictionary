@@ -1,16 +1,16 @@
-package com.example.simpledictionary.ui
+package com.example.simpledictionary.ui.edit_word
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
+import android.widget.Toast
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.example.simpledictionary.databinding.FragmentFirstBinding
-import com.example.simpledictionary.db.DictionaryDBHelper
 import com.example.simpledictionary.models.EnglishWords
 import com.example.simpledictionary.repository.SimpleDictDBRepository
-import dagger.hilt.EntryPoint
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -26,6 +26,7 @@ class FirstFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private val viewModel: EdtWordViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,14 +45,46 @@ class FirstFragment : Fragment() {
 //            findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
 //        }
         binding.btnAddword.setOnClickListener {
+            validateAndAddWord()
+        }
 
+        observeUI()
+    }
+
+    private fun observeUI(){
+        viewModel.wordAdded.observe(viewLifecycleOwner, Observer {
+            if(it) {
+                Toast.makeText(requireContext(), "Word added successfully", Toast.LENGTH_LONG)
+                    .show()
+                binding.edtWord.setText("")
+                binding.edtType.setText("")
+                binding.edtMeaning.setText("")
+            }
+        })
+    }
+
+    private fun validateAndAddWord(){
+        val word = binding.edtWord.text
+        val type = binding.edtType.text
+        val meaning = binding.edtMeaning.text
+
+        if(word.isNullOrBlank()){
+            binding.edtWord.error = "Enter word!!!"
+            binding.edtWord.requestFocus()
+        }else if(type.isNullOrBlank()){
+            binding.edtType.error = "Enter word type!!!"
+            binding.edtType.requestFocus()
+        }else if(meaning.isNullOrBlank()){
+            binding.edtMeaning.error = "Enter word meaning!!!"
+            binding.edtMeaning.requestFocus()
+        }else{
             val word = EnglishWords(
                 id = 0,
-                word = "a",
-                type = "noun",
-                meaning = "First letter of english alphabet"
+                word = word.toString(),
+                type = type.toString(),
+                meaning = meaning.toString()
             )
-            wordsDBRepository.addWord(word)
+            viewModel.addWord(word)
         }
 
     }

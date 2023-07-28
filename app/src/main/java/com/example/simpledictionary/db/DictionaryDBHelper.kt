@@ -6,6 +6,9 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.example.simpledictionary.db.entities.EnglishWordsEntryContract
+import com.example.simpledictionary.db.entities.EnglishWordsEntryContract.Companion.COLUMN_ID
+import com.example.simpledictionary.db.entities.EnglishWordsEntryContract.Companion.COLUMN_WORD
+import com.example.simpledictionary.db.entities.EnglishWordsEntryContract.Companion.TABLE_ENGLISH_WORDS
 import com.example.simpledictionary.db.utils.DBPrefs
 import com.example.simpledictionary.models.EnglishWords
 import java.io.FileOutputStream
@@ -21,14 +24,14 @@ class DictionaryDBHelper @Inject constructor(private var context:Context, privat
         private val DB_VERSION = 1
         val DB_CREATED = "DB_CREATED"
         private val TAble_CREATE_QUERY = """
-                create table ${EnglishWordsEntryContract.TABLE_ENGLISH_WORDS} (
+                create table $TABLE_ENGLISH_WORDS (
                     ${EnglishWordsEntryContract.COLUMN_ID} INTEGER PRIMARY KEY AUTOINCREMENT,
-                    ${EnglishWordsEntryContract.COLUMN_WORD} TEXT, 
+                    $COLUMN_WORD TEXT, 
                     ${EnglishWordsEntryContract.COLUMN_TYPE} TEXT,
                     ${EnglishWordsEntryContract.COLUMN_MEANING} TEXT
                 );
                 """
-        private val TABLE_DROP_QUERY = "drop table if exists ${EnglishWordsEntryContract.TABLE_ENGLISH_WORDS};"
+        private val TABLE_DROP_QUERY = "drop table if exists $TABLE_ENGLISH_WORDS;"
     }
 
     private var mCreatedDB = false
@@ -104,42 +107,57 @@ class DictionaryDBHelper @Inject constructor(private var context:Context, privat
 
     fun addWord(engWord: EnglishWords){
         val contentValues = ContentValues()
+        val db = writableDatabase
+
+        var lastIndex = -1L
+
+        val cursor = db.rawQuery("SELECT MAX($COLUMN_ID) FROM $TABLE_ENGLISH_WORDS", null)
+
+        cursor?.let {
+            if(it.moveToFirst()){
+                lastIndex = it.getLong(0)
+            }
+            it.close()
+        }
+
+
         contentValues.apply {
-            put(EnglishWordsEntryContract.COLUMN_WORD, engWord.word)
+            put(COLUMN_ID, lastIndex+1)
+            put(COLUMN_WORD, engWord.word)
             put(EnglishWordsEntryContract.COLUMN_TYPE, engWord.type)
             put(EnglishWordsEntryContract.COLUMN_MEANING, engWord.meaning)
-            writableDatabase.insert(EnglishWordsEntryContract.TABLE_ENGLISH_WORDS,null, contentValues)
         }
+        db.insert(TABLE_ENGLISH_WORDS, null, contentValues)
     }
 
     fun getAllWords(prefix: String = ""):Cursor{
         //dbPrefs.saveDBCreatedStatus("KEY",true)
         if(prefix.isBlank()){
             return readableDatabase.query(
-                EnglishWordsEntryContract.TABLE_ENGLISH_WORDS,
+                TABLE_ENGLISH_WORDS,
                 null,
                 null,
                 null,
                 null,
                 null,
-                "${EnglishWordsEntryContract.COLUMN_ID} ASC"
+                "${COLUMN_WORD} ASC"
             )
         }else{
             return readableDatabase.query(
-                EnglishWordsEntryContract.TABLE_ENGLISH_WORDS,
+                TABLE_ENGLISH_WORDS,
                 null,
-                "${EnglishWordsEntryContract.COLUMN_WORD} like ?",
+                "$COLUMN_WORD like ?",
                 arrayOf("$prefix%"),
                 null,
                 null,
-                "${EnglishWordsEntryContract.COLUMN_ID} ASC"
+                "${COLUMN_WORD} ASC"
             )
         }
     }
 
     fun getWordDetails(id: Int):EnglishWords{
         val cursor = readableDatabase.query(
-            EnglishWordsEntryContract.TABLE_ENGLISH_WORDS,
+            TABLE_ENGLISH_WORDS,
             null,
             "${EnglishWordsEntryContract.COLUMN_ID} = ? ",
             arrayOf("$id"),
@@ -151,7 +169,7 @@ class DictionaryDBHelper @Inject constructor(private var context:Context, privat
         cursor.moveToFirst()
         val word =  EnglishWords(
             id = cursor.getInt(cursor.getColumnIndexOrThrow(EnglishWordsEntryContract.COLUMN_ID)),
-            word = cursor.getString(cursor.getColumnIndexOrThrow(EnglishWordsEntryContract.COLUMN_WORD)),
+            word = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_WORD)),
             type = cursor.getString(cursor.getColumnIndexOrThrow(EnglishWordsEntryContract.COLUMN_TYPE)),
             meaning = cursor.getString(cursor.getColumnIndexOrThrow(EnglishWordsEntryContract.COLUMN_MEANING))
         )

@@ -48,14 +48,15 @@ class WordsAdapter(context: Context, cursor: Cursor): CursorAdapter(context,curs
         wordsViewHolder.tvMeaning?.text = cursor?.getString(wordsViewHolder.meaningColumnIndex)
     }
 
-    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        val view = super.getView(position, convertView, parent)
-        if(position%2==0){
-            view.setBackgroundResource(R.color.item_secondary)
-        }else{
-            view.setBackgroundColor(Color.WHITE)
-        }
-        return view
-    }
+//    override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+//        val view = super.getView(position, convertView, parent)
+//        if(position%2==0){
+//            view.setBackgroundResource(R.color.item_secondary)
+//            view.setBackgroundColor(Color.WHITE)
+//        }else{
+//            view.setBackgroundColor(Color.WHITE)
+//        }
+//        return view
+//    }
 
 }

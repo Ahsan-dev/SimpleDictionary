@@ -1,4 +1,4 @@
-package com.example.simpledictionary.ui
+package com.example.simpledictionary.ui.main_list
 
 import android.os.Bundle
 import android.util.Log
@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.example.simpledictionary.R
 import com.example.simpledictionary.adapters.WordsAdapter
@@ -24,6 +26,7 @@ class SecondFragment : Fragment() {
     private var _binding: FragmentSecondBinding? = null
     @Inject
     lateinit var simpleDictDBRepo: SimpleDictDBRepository
+    private val viewModel: MainViewModel by viewModels()
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -52,7 +55,9 @@ class SecondFragment : Fragment() {
 //            findNavController().navigate(R.id.action_SecondFragment_to_FirstFragment)
 //        }
         mSearchedQuery = savedInstanceState?.getString(LAST_SEARCHED_QUERY) ?: ""
+        viewModel.fetchAllWords(mSearchedQuery)
         renderList()
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -69,20 +74,24 @@ class SecondFragment : Fragment() {
 
     fun renderList(){
         val cursor = simpleDictDBRepo.getAllWords(mSearchedQuery)
-        mWordsAdapter = WordsAdapter(requireContext(),cursor)
-        binding.lvWords.adapter = mWordsAdapter
-        binding.lvWords.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, pos, rawId ->
-            val bundle = Bundle()
-            bundle.putInt(ARG_ID,rawId.toInt())
-            findNavController().navigate(R.id.action_SecondFragment_to_wordDetailsFragment,bundle)
-        }
+        viewModel.allWordsCursor.observe(viewLifecycleOwner, Observer {
+            mWordsAdapter = WordsAdapter(requireContext(),it)
+            binding.lvWords.adapter = mWordsAdapter
+            binding.lvWords.onItemClickListener = AdapterView.OnItemClickListener { adapterView, view, pos, rawId ->
+                val bundle = Bundle()
+                bundle.putInt(ARG_ID,rawId.toInt())
+                findNavController().navigate(R.id.action_SecondFragment_to_wordDetailsFragment,bundle)
+            }
+        })
+
     }
 
     fun searchedList(prefix: String){
         mSearchedQuery = prefix
         Log.d("MainActivity","Search Called on Fragment")
-        val cursor = simpleDictDBRepo.getAllWords(prefix)
-        mWordsAdapter?.changeCursor(cursor)
+//        val cursor = simpleDictDBRepo.getAllWords(prefix)
+//        mWordsAdapter?.changeCursor(cursor)
+        viewModel.fetchAllWords(prefix)
         //binding.lvWords.adapter = mWordsAdapter
     }
 

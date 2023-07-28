@@ -1,6 +1,5 @@
-package com.example.simpledictionary.ui
+package com.example.simpledictionary.ui.main_list
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import com.google.android.material.snackbar.Snackbar
@@ -14,17 +13,18 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.SearchView
 import androidx.activity.viewModels
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.FragmentNavigator
 import com.example.simpledictionary.R
 import com.example.simpledictionary.databinding.ActivityMainBinding
 import com.example.simpledictionary.databinding.ActivityMainLoadingBinding
 import com.example.simpledictionary.db.DictionaryDBHelper
 import com.example.simpledictionary.db.utils.DBPrefs
-import com.example.simpledictionary.ui.viewmodels.MainViewModel
-import com.example.simpledictionary.ui.viewmodels.MainViewModelFactory
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
@@ -53,11 +53,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         //viewModel = ViewModelProvider(this,viewModelFactory).get(MainViewModel::class.java)
-        viewModel.getTestValue()
 
-        viewModel.test.observe(this, {result->
-            Log.d(TAG,"$result")
-        })
+        //Test Builder Pattern
+//        Dictionary.Builder()
+//            .word(true)
+//            .type(true)
+//            .meaning(true)
+//            .build()
 
         //setupMainUi()
         if(!dbPrefs.getDBCreatedStatus(DictionaryDBHelper.DB_CREATED)){
@@ -160,15 +162,27 @@ class MainActivity : AppCompatActivity() {
 
     class LoadDictTask(activity: MainActivity){
         private var mActivity = WeakReference(activity)
+//        fun execute(){
+//            Thread(Runnable {
+//                if(getActivityInstance()?.dictionaryDBHelper?.readableDatabase?.isOpen == true){
+//                    Log.d(TAG, "Database Loaded.")
+//                }
+//                getActivityInstance()?.runOnUiThread {
+//                    getActivityInstance()?.setupMainUi()
+//                }
+//            }).start()
+//        }
+
+        @OptIn(DelicateCoroutinesApi::class)
         fun execute(){
-            Thread(Runnable {
+            GlobalScope.launch(Dispatchers.IO) {
                 if(getActivityInstance()?.dictionaryDBHelper?.readableDatabase?.isOpen == true){
                     Log.d(TAG, "Database Loaded.")
                 }
-                getActivityInstance()?.runOnUiThread {
+                withContext(Dispatchers.Main){
                     getActivityInstance()?.setupMainUi()
                 }
-            }).start()
+            }
         }
 
         private fun getActivityInstance() = mActivity.get()

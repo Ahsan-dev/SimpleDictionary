@@ -56,4 +56,8 @@
     <string name="tv_detail_type">Type</string>
     <string name="tv_detail_meaning">Meaning</string>
     <string name="tv_loading">Loading Dictionary Data...</string>
+    <string name="tv_add_word_title">Add a new word</string>
+    <string name="edt_word">Enter word</string>
+    <string name="edt_type">Enter Type</string>
+    <string name="edt_meaning">Enter Meaning</string>
 </resources>
